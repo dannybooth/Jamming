@@ -1,29 +1,30 @@
-import React from 'react';
-import './SearchBar.css';
+import React, { useState } from 'react';
+import searchSpotify from '../api/SearchSpotify'; // Import the function
 
-class SearchBar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { searchTerm: '' };
+const SearchBar = ({ onSearch }) => {
+  const [query, setQuery] = useState('');
 
-    this.handleTermChange = this.handleTermChange.bind(this);
-  }
+  const handleSearch = async (event) => {
+    event.preventDefault();
+    try {
+      const results = await searchSpotify(query); // Use the API function
+      onSearch(results);
+    } catch (error) {
+      console.error('Failed to fetch tracks:', error);
+    }
+  };
 
-  handleTermChange(event) {
-    this.setState({ searchTerm: event.target.value });
-  }
-
-  render() {
-    return (
-      <div className="SearchBar">
-        <input
-          placeholder="Enter A Song, Album, or Artist"
-          onChange={this.handleTermChange}
-        />
-        <button className="SearchButton">SEARCH</button>
-      </div>
-    );
-  }
-}
+  return (
+    <form onSubmit={handleSearch}>
+      <input
+        type="text"
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search for tracks"
+      />
+      <button type="submit">Search</button>
+    </form>
+  );
+};
 
 export default SearchBar;

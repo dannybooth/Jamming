@@ -1,21 +1,22 @@
 import React from 'react';
-import Track from '../Track/Track';
 import './Tracklist.css';
 
-const Tracklist = ({ tracks, onAdd, onRemove, isRemoval }) => {
+const TrackList = ({ tracks = [] }) => {
   return (
-    <div className="Tracklist">
-      {tracks.map(track => (
-        <Track 
-          key={track.id} 
-          track={track} 
-          onAdd={onAdd} 
-          onRemove={onRemove} 
-          isRemoval={isRemoval} 
-        />
-      ))}
+    <div className="TrackList">
+      {tracks.length > 0 ? (
+        tracks.map(track => (
+          <div key={track.id} className="Track">
+            <h3>{track.name}</h3>
+            <p>{track.artists.map(artist => artist.name).join(', ')}</p>
+            <p>{track.album.name}</p>
+          </div>
+        ))
+      ) : (
+        <p>No tracks found</p>
+      )}
     </div>
   );
 };
 
-export default Tracklist;
+export default TrackList;

@@ -1,12 +1,12 @@
 import React from 'react';
-import Tracklist from '../Tracklist/Tracklist';
-import './SearchResults.css';
+import TrackList from '../Tracklist/Tracklist';
 
-const SearchResults = ({ searchResults, onAdd }) => {
+const SearchResults = ({ searchResults }) => {
+  // Make sure to pass the tracks array correctly
   return (
     <div className="SearchResults">
       <h2>Results</h2>
-      <Tracklist tracks={searchResults} onAdd={onAdd} isRemoval={false} />
+      <TrackList tracks={searchResults.tracks} />
     </div>
   );
 };
