@@ -1,29 +1,35 @@
 import React, { useState } from 'react';
-import searchSpotify from '../api/SearchSpotify'; // Import the function
+import axios from 'axios';
 
-const SearchBar = ({ onSearch }) => {
+const SearchBar = ({ token }) => {
   const [query, setQuery] = useState('');
 
-  const handleSearch = async (event) => {
-    event.preventDefault();
-    try {
-      const results = await searchSpotify(query); // Use the API function
-      onSearch(results);
-    } catch (error) {
-      console.error('Failed to fetch tracks:', error);
-    }
+  const search = async () => {
+    if (!token) return;
+
+    const response = await axios.get(`https://api.spotify.com/v1/search?q=${query}&type=album,artist`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    console.log(response.data);
   };
 
   return (
-    <form onSubmit={handleSearch}>
+    <div>
       <input
         type="text"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search for tracks"
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            search();
+          }
+        }}
       />
-      <button type="submit">Search</button>
-    </form>
+      <button onClick={search}>Search</button>
+    </div>
   );
 };
 
