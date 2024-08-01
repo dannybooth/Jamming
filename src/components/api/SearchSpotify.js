@@ -27,6 +27,11 @@ export const getToken = async (code) => {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
   });
+  console.log(response.data.access_token);
+  console.log(response.data);
 
+  console.log(CLIENT_ID);
+  console.log(CLIENT_SECRET);
+  console.log(REDIRECT_URI);
   return response.data;
 };

@@ -7,13 +7,9 @@ import './index.css';
 const App = () => {
   const [token, setToken] = useState('');
   const [userId, setUserId] = useState('');
-  const [results, setResults] = useState([]);
   const [query, setQuery] = useState('');
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [playlistId, setPlaylistId] = useState('');
-  const getTrackUris = () => {
-    return selectedItems.map(item => item.uri);
-  };
+  const [results, setResults] = useState({ albums: [], artists: [], tracks: [] });
+  const [selectedTracks, setSelectedTracks] = useState([]);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -29,12 +25,16 @@ const App = () => {
   }, []);
 
   const getUserProfile = async (token) => {
-    const response = await axios.get('https://api.spotify.com/v1/me', {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    setUserId(response.data.id);
+    try {
+      const response = await axios.get('https://api.spotify.com/v1/me', {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setUserId(response.data.id);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
   };
 
   const handleLogin = () => {
@@ -44,39 +44,49 @@ const App = () => {
   const search = async () => {
     if (!token || !query) return;
 
-    const response = await axios.get(`https://api.spotify.com/v1/search?q=${query}&type=album,artist`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    try {
+      const response = await axios.get(`https://api.spotify.com/v1/search?q=${query}&type=album,artist,track`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-    setResults(response.data.albums.items);
-    console.log(response.data);
+      const albums = response.data.albums?.items || [];
+      const artists = response.data.artists?.items || [];
+      const tracks = response.data.tracks?.items || [];
+
+      setResults({ albums, artists, tracks });
+    } catch (error) {
+      console.error('Error performing search:', error);
+    }
   };
 
   const addItem = (item) => {
-    const isItemSelected = selectedItems.some(selectedItem => selectedItem.id === item.id);
+    const isItemSelected = selectedTracks.some(selectedTrack => selectedTrack.id === item.id);
     if (!isItemSelected) {
-      setSelectedItems(prevItems => [...prevItems, item]);
+      setSelectedTracks(prevTracks => [...prevTracks, item]);
     } else {
-      setSelectedItems(prevItems => prevItems.filter(selectedItem => selectedItem.id !== item.id));
+      setSelectedTracks(prevTracks => prevTracks.filter(selectedTrack => selectedTrack.id !== item.id));
     }
   };
 
   const handleCreateAndAddTracks = async () => {
     const inputElement = document.getElementById('pname');
     const playlistName = inputElement.value;
-    const uris = getTrackUris();
-    console.log("this: ",uris);
+    const uris = selectedTracks.map(track => track.uri);
     if (!playlistName) {
       alert('Please enter a playlist name');
       return;
     }
 
-    const playlistId = await createPlaylist(userId, token, playlistName);
-    
-    if (playlistId) {
-      await addTracksToPlaylist(playlistId, token, uris);
+    try {
+      const playlist = await createPlaylist(userId, token, playlistName);
+      if (playlist) {
+        await addTracksToPlaylist(playlist.id, token, uris);
+        alert('Playlist created and tracks added!');
+      }
+    } catch (error) {
+      console.error('Error creating playlist and adding tracks:', error);
     }
   };
 
@@ -89,7 +99,7 @@ const App = () => {
         <div>
           <input
             type="text"
-            placeholder="Search for albums or artists..."
+            placeholder="Search for albums, artists, or tracks..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -99,29 +109,39 @@ const App = () => {
             }}
           />
           <div className="results">
-            {results.map(album => (
-            <div key={album.id} className="result-item" onClick={(e) => addItem(album, e)}>
-              <img src={album.images[0]?.url} alt={album.name} />
-              <p>{album.name}</p>
-              <p>{album.artists.map(artist => artist.name).join(', ')}</p>
+            {results.tracks.map(track => (
+              <div key={track.id} className="result-item" onClick={() => addItem(track)}> 
+              <img src={track.album.images[0]?.url} alt={track.name} />
+              {track.preview_url && (
+                  <audio controls>
+                    <source src={track.preview_url} type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
+                )}
+                <p>{track.name}</p>
+                <p>{track.artists.map(artist => artist.name).join(', ')}</p>
               </div>
-              ))}
-              </div>
+            ))}
+          </div>
           <h1 className="title">Playlist</h1>
-          <input type="text" id="pname" name="pname" placeholder="Enter a name for your playlist"></input>
-          <br></br>
-          <br></br>
+          <input type="text" id="pname" name="pname" placeholder="Enter a name for your playlist" />
+          <br />
+          <br />
           <div className="selected-items">
-            {selectedItems.map(item => (
-              <div key={item.id} className="selected-item" onClick={(e) => addItem(item, e)}>
-                <img src={item.images[0]?.url} alt={item.name} />
+            {selectedTracks.map(item => (
+              <div key={item.id} className="selected-item" onClick={() => addItem(item)}>
+                <img src={item.album.images[0]?.url} alt={item.name} />
                 <p>{item.name}</p>
                 <p>{item.artists.map(artist => artist.name).join(', ')}</p>
               </div>
             ))}
           </div>
+          <br></br>
+          <br></br>
           <div className="button-container">
-          <button type="submit" value="Submit" className="psubmit" onClick={handleCreateAndAddTracks}>Create Playlist</button>
+            <button type="submit" value="Submit" className="psubmit" onClick={handleCreateAndAddTracks}>
+              Create Playlist
+            </button>
           </div>
         </div>
       )}

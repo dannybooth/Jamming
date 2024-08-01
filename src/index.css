@@ -23,8 +23,9 @@ input[type="text"]::placeholder {
 .results {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  column-gap: 155px;
   margin-top: 20px;
+  row-gap: 5px;
   justify-content: center;
 }
 
@@ -44,7 +45,8 @@ input[type="text"]::placeholder {
 }
 
 .result-item:hover {
-  filter: brightness(150%);
+  transform: scale(1.1);
+  transition: transform 0.2s;
 }
 
 .result-item p {
@@ -82,7 +84,8 @@ input[type="text"]::placeholder {
 }
 
 .selected-item:hover {
-  filter: brightness(150%);
+  transform: scale(1.1);
+  transition: transform 0.2s;
 }
 
 .psubmit-button{

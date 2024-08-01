@@ -11,21 +11,27 @@ export const getUserPlaylists = async (token) => {
 };
 
 // Create a new playlist
-export const createPlaylist = async (userId, token, name) => {
-  const response = await axios.post(
-    `https://api.spotify.com/v1/users/${userId}/playlists`,
-    {
-      name,
-      description: 'Created with Jammming',
-      public: false,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
+export const createPlaylist = async (userId, token, title) => {
+  console.log("token: "+token);
+  console.log("userId: "+userId);
+  try {
+    const response = await axios.post(
+      `https://api.spotify.com/v1/users/${userId}/playlists`,
+      {
+        name: title,
+        description: 'New playlist description',
+        public: false,
       },
-    }
-  );
-  return response.data;
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error creating playlist:', error);
+  }
 };
 
 // Add tracks to a playlist
