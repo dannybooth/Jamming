@@ -94,7 +94,9 @@ const App = () => {
     <div>
       <h1 className="title">Jammming</h1>
       {!token ? (
-        <button onClick={handleLogin}>Login with Spotify</button>
+        <div className="button-container">
+        <button onClick={handleLogin} className="submit" >Login with Spotify</button>
+        </div>
       ) : (
         <div>
           <input
@@ -139,7 +141,7 @@ const App = () => {
           <br></br>
           <br></br>
           <div className="button-container">
-            <button type="submit" value="Submit" className="psubmit" onClick={handleCreateAndAddTracks}>
+            <button type="submit" value="Submit" className="submit" onClick={handleCreateAndAddTracks}>
               Create Playlist
             </button>
           </div>
